@@ -1,0 +1,97 @@
+浅谈requireJS全屏模式
+2016-04-26 21:44 by 猴子猿, 2125 阅读, 0 评论, 收藏, 编辑
+项目中大都使用模块化开发，requireJS作为AMD模块开发的典范，所以有必要学习下。通过一步步利用requireJS编写demo，从而学习requireJS的一个整体开发流程以及自我使用requireJS的一些感受。
+
+AMD：一种基于模块的异步加载JavaScript代码的机制，它推荐开发人员将JavaScript代码封装进一个个模块，对全局对象的依赖变成了对其他模块的依赖，无须再声明一大堆的全局变量。通过延迟和按需加载来解决各个模块的依赖关系。模块化的JavaScript代码好处很明显，各个功能组件的松耦合性可以极大的提升代码的复用性、可维护性。这种非阻塞式的并发式快速加载JavaScript代码，使Web页面上其他不依赖 JavaScript代码的UI元素，如图片、CSS以及其他DOM节点得以先加载完毕，Web页面加载速度更快，用户也得到更好的体验。
+
+1、  下载requieJS
+
+在用requieJS模块化开发之前，我们需要准备一些东西。那肯定就是下载require.js文件咯，哈哈哈，因为是基于它开发嘛。
+
+2、  创建一个HTML文件
+
+创建一个HTML文件后，导入requireJS肯定是使用<script>标签的，这个毫无疑问。然后在这个标签中有个data-main属性，它的作用呢是作为一个出入口，就是说在加载requireJS后，从data-main这个属性进入。
+
+比如下面这样：
+
+复制代码
+ <!DOCTYPE html>
+    <head>
+        <title>require</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    </head>
+    <body>
+        <!--这是requireJS，data-main是作为入口模块，在这里就是js/main-->
+        <script data-main="js/main" src="js/require.js"></script>
+    </body>
+</html>
+复制代码
+当我通过加载js/require.js后，然后去执行js/main的js文件。main它也是个js文件，我们可以将它的.js后缀省略掉，requireJS会将其加上。
+
+3、  data-main
+
+当程序执行<script data-main=’js/main’ src=’js/require.js’></script>后，通过data-main进入main.js，去执行main.js。那main.js里是些什么东东呢？
+
+请看代码：
+
+复制代码
+/*
+    require.config执行baseUrl为'js'，
+    baseUrl指的模块文件的根目录，可以是绝对路径或相对路径
+*/
+require.config({
+    baseUrl: 'js',
+    paths: {
+        jquery: 'jquery-1.8.2.min'
+    }
+});
+/*
+    这里通过require，来引入monkey.js，
+    然后通过后面的匿名函数给他们分配参数，如这里的
+    monkey-->mk
+*/
+require(['monkey'],function(mk) {
+    mk.init();   
+});
+复制代码
+从上面代码中，可以看见main.js中包含require.config和require两个模块。
+
+require.config的作用就是配置requireJS的一些参数，然后公共引用。
+
+例如，上面的baseUrl，它的作用就是，以它作为基础路径，在这个路径之下，查找文件。我是将所有.js文件都放在js文件夹下的。所以，在配置这个属性后，以后的文件都是在js这个路径下查找内容了。
+
+如下：
+
+require(['monkey'], function(monkey){
+    monkey.init();
+});
+它在引用monkey时，就是引用的monkey，而不是js/monkey。
+
+paths的作用呢？就是将一些常用的js文件，换成通用的名字。例如jquery-1.8.2.min.js，我们不可能每次调用它时，都写这一啪啦吧，所以为了方便，就将jquery替代jquery-1.8.2.min.js咯，以后我们就可以直接使用jquery了，快捷方便。
+
+好了，require.config基本混了个脸熟，一句话，它的作用就是配置requireJS嘛。
+
+那require呢？
+
+require的作用就是执行。比如这里我只需要monkey.js去执行，所以我就导入了monkey，然后通过mk参数，获得monkey执行后的返回值。如果有返回值，然后我们就可以对mk做相应的处理了。
+
+咦，那monkey里面是个什么呢？
+
+我们看看：
+
+复制代码
+/*
+    define的参数为匿名函数，该匿名函数返回一个对象
+*/
+define(['jquery'],function($){
+    var init = function(){
+        console.log($.browser);
+    };
+    return {
+        init: init
+    };
+});
+复制代码
+define！它的作用是，定义一个js模块，供其他模块或者require使用。它引用其他js的模块的方法和require差不多，都是将需要的js文件引入，然后参数一一对应。大家需要要注意的是，define里定义的方法或者变量，其他模块是访问不到的，所以，你如果想其他模块也能访问，就将相应的方法抛出去(return)对象或者函数都可以。在这里，我return的是一个对象，提供init供其他模块调用。
+
+好了，详细代码见here

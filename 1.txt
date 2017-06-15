@@ -1,0 +1,69 @@
+RequireJS是一个非常小巧的JavaScript模块载入框架，是AMD规范最好的实现者之一。最新版本的RequireJS压缩后只有14K，堪称非常轻量。它还同时可以和其他的框架协同工作，使用RequireJS必将使您的前端代码质量得以提升。
+requirejs能带来什么好处
+官方对requirejs的描述：
+RequireJS is a JavaScript file and module loader. It is optimized for in-browser use, but it can be used in other JavaScript environments, like Rhino and Node. Using a modular script loader like RequireJS will improve the speed and quality of your code.
+大致意思：
+在浏览器中可以作为js文件的模块加载器，也可以用在Node和Rhino环境，balabala...。这段话描述了requirejs的基本功能"模块化加载"，什么是模块化加载？我们要从之后的篇幅中一一解释
+先来看一段常见的场景，通过示例讲解如何运用requirejs
+正常编写方式
+index.html:
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="a.js"></script>
+    </head>
+    <body>
+      <span>body</span>
+    </body>
+</html>
+a.js:
+function fun1(){
+  alert("it works");
+}
+
+fun1();
+可能你更喜欢这样写
+(function(){
+    function fun1(){
+      alert("it works");
+    }
+
+    fun1();
+})()
+第二种方法使用了块作用域来申明function防止污染全局变量，本质还是一样的，当运行上面两种例子时不知道你是否注意到，alert执行的时候，html内容是一片空白的，即<span>body</span>并未被显示，当点击确定后，才出现，这就是JS阻塞浏览器渲染导致的结果。
+requirejs写法
+当然首先要到requirejs的网站去下载js -> requirejs.org
+index.html:
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="require.js"></script>
+        <script type="text/javascript">
+            require(["a"]);
+        </script>
+    </head>
+    <body>
+      <span>body</span>
+    </body>
+</html>
+a.js:
+define(function(){
+    function fun1(){
+      alert("it works");
+    }
+
+    fun1();
+})
+浏览器提示了"it works"，说明运行正确，但是有一点不一样，这次浏览器并不是一片空白，body已经出现在页面中，目前为止可以知道requirejs具有如下优点：
+防止js加载阻塞页面渲染
+使用程序调用的方式加载js，防出现如下丑陋的场景
+<script type="text/javascript" src="a.js"></script>
+<script type="text/javascript" src="b.js"></script>
+<script type="text/javascript" src="c.js"></script>
+<script type="text/javascript" src="d.js"></script>
+<script type="text/javascript" src="e.js"></script>
+<script type="text/javascript" src="f.js"></script>
+<script type="text/javascript" src="g.js"></script>
+<script type="text/javascript" src="h.js"></script>
+<script type="text/javascript" src="i.js"></script>
+<script type="text/javascript" src="j.js"></script>
